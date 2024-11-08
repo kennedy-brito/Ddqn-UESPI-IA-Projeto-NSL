@@ -102,8 +102,19 @@ class Map:
                 
 
     def get_pos_data(self, pos: tuple[int]):
-        # data list: x, y, is_out_of_bounds, is_empty, is_block,
-        #            is_agent, agent_id, agent_team, agent_life
+        # data list: 
+        # 0: x, 
+        # 1: y, 
+        # 2: is_out_of_bounds, 
+        # 3: is_empty, 
+        # 4: is_block,
+        # 5: is_agent, 
+        # 6: agent_id, 
+        # 7: agent_team, 
+        # 8: agent_life
+        """
+        Isso são os dados de uma das células do tabuleiro
+        """
         data = [pos[0], pos[1], 0, 1, 0, 0, -1, -1, -1]
         if not self.is_inbounds(pos):
             data[2] = 1
@@ -119,6 +130,10 @@ class Map:
         return data
 
     def get_view(self, pos: tuple[int]):
+        """
+        Retorna uma visualização do agente com base em seu alcance
+            Cada posição do dicionário são os dados de uma das célula
+        """
         RANGE = Agent.RANGE
         data: dict = {}
         c_i = 0

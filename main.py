@@ -1,79 +1,9 @@
 from ai import *
-from entities import Match, Map, Agent
+from entities import Match, Map, Agent, Trainer
 
 import pygad.torchga, torch
 
 import argparse, importlib, os, math
-
-class Trainer:
-    def __init__(self, model, other) -> None:
-        self.model: torch.nn.Module = model
-        self.other = other
-        # This could be used for dynamic changes in training
-        self.best_fitness = -math.inf
-        
-    def train(self, generations: int, parents: int):
-        torch_ga = pygad.torchga.TorchGA(self.model, num_solutions=10)
-
-        # Number of generations to train for
-        num_generations = generations
-        # Number of solutions to be selected as parents
-        num_parents_mating = parents
-        # We define the initial population/chromossomes/genes to be 
-        # the initial weight of our model, this could be changed
-        # to either use pygad.GA initialization methods, or, to 
-        # initilize the weights before using it as initial population
-        initial_population = torch_ga.population_weights
-
-        # Create the Genetic Algorithm instance
-        ga_instance = pygad.GA(num_generations=num_generations,
-                            num_parents_mating=num_parents_mating,
-                            initial_population=initial_population,
-                            fitness_func=self.fitness,
-                            on_generation=self.callback_generation
-                            #parallel_processing=['thread', 4],
-                            )
-        # And finally run training
-        ga_instance.run()
-        torch.save(self.model.state_dict(), "last.pt")
-        m = Match(3, self.model, self.other, presentation=True,
-                  sleep_time=0.5)
-        m.play(self.turn_callback)
-
-    def fitness(self, ga_instance: pygad.GA, solution, sol_idx):
-        model_weights_dict = pygad.torchga.model_weights_as_dict(model=self.model,
-                                                    weights_vector=solution)
-        self.model.load_state_dict(model_weights_dict)
-        
-        m = Match(3, self.model, self.other, presentation=False, sleep_time=0.01, print_log=False)
-        m.play(callback=self.turn_callback)
-        Agent.CUR_ID = 0
-        
-        solution_fitness = self.model.get_reward(m.map.list_agents, ga_instance.generations_completed)
-        return solution_fitness
-
-    def turn_callback(self, team: int, ID: int, previous_pos: tuple, action: int, list_agents: list[Agent]):
-        if team == 0:
-            self.model.turn_reward(team, ID, previous_pos, action, list_agents)
-    
-    def callback_generation(self, ga_instance: pygad.GA):
-        """
-        Method called after each generation
-        Parameters:
-            ga_instante (pygad.GA): instance of Genetic Algorithm training
-        Returns:
-            None | str: if returns "stop" training is halted
-        """
-        # Right now this display our generation and fitness
-        print("Generation = {generation}".format(generation=ga_instance.generations_completed))
-        print("Fitness    = {fitness}".format(fitness=ga_instance.best_solution()[1]))
-        
-        # But we could do so much more!
-        model_weights_dict = pygad.torchga.model_weights_as_dict(model=self.model,
-                                                    weights_vector=ga_instance.best_solution()[0])
-        if ga_instance.best_solution()[1] > self.best_fitness:
-            self.best_fitness = ga_instance.best_solution()[1]
-            torch.save(model_weights_dict, f"model_{ga_instance.generations_completed}.pt")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
