@@ -33,8 +33,13 @@ if __name__ == "__main__":
     Map.MAX_WIDTH = args.max_width
     Map.MAX_HEIGHT = args.max_height
 
+    # the state is composed of a view range with 121 cells
+		# each cell has 8 information
+		# thus our state tensor has 121*8 items
+    STATE_SIZE = 121*8
+
     class0 = getattr(importlib.import_module(f"ai.{args.team_0_module}", "ai"), args.team_0_class)
-    model0: torch.nn.Module = class0(0)
+    model0: torch.nn.Module = class0(STATE_SIZE)
     if not args.load_0 is None and os.path.isfile(args.load_0):
         state_dict = torch.load(args.load_0)
         model0.load_state_dict(state_dict)
