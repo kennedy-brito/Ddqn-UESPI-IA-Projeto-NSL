@@ -37,9 +37,9 @@ if __name__ == "__main__":
 		# each cell has 8 information
 		# thus our state tensor has 121*8 items
     STATE_SIZE = 121*8
-
+    num_actions = 10
     class0 = getattr(importlib.import_module(f"ai.{args.team_0_module}", "ai"), args.team_0_class)
-    model0: torch.nn.Module = class0(STATE_SIZE)
+    model0: torch.nn.Module = class0(STATE_SIZE, num_actions)
     if not args.load_0 is None and os.path.isfile(args.load_0):
         state_dict = torch.load(args.load_0)
         model0.load_state_dict(state_dict)
@@ -51,6 +51,7 @@ if __name__ == "__main__":
         model1.load_state_dict(state_dict)
     
     if args.train: 
+        #TODO: Implement Baisian optimization
         t = Trainer(model0, model1)
         t.train(args.generations, args.parents)
     else:

@@ -16,7 +16,7 @@ class Trainer:
 		self.model = model0
 		self.enemy = model1
 		self.memory = ReplayMemory(1000)
-		self.target = Ddqn(STATE_SIZE)
+		self.target = Ddqn(STATE_SIZE, 10)
 
 		self.target.load_state_dict(self.model.state_dict())
 
@@ -30,7 +30,7 @@ class Trainer:
 			self, 
 			epsilon_min, # the minimum value of the exploration policy
 			epsilon_init, # the initial value of the exploration rate
-			epsilon_decay, # the decay rate of the exploration rate, it will be linear
+			epsilon_decay, # the decay rate of the exploration rate, it will be exponential
 			learning_rate, # the model learning rate
 			discount_factor_g, # the discount factor of the rewards
 			network_sync_rate, # the rate that we sync the target network with the model
@@ -52,15 +52,14 @@ class Trainer:
 			lr=learning_rate
 		)
 		
-		#TODO: ADD EXPLORATION DECISION MAKING IN THE MODEL get_action METHOD
 		epsilon = epsilon_init
-		episode_count = 0
+
+		self.model.exploration_policy(True, epsilon, epsilon_decay, epsilon_min)
 
 		for episode in range(0, 1000):
 
 			self.m = Match(3, self.model, self.enemy, presentation=False, sleep_time=0.01, print_log=False)
 
-			#TODO: Could add a callback to train by turn instead of by match
 			self.m.play(self.turn_callback)
 
 			episode_reward = self.total_reward - self.previous_total_reward
@@ -72,14 +71,15 @@ class Trainer:
 				self.save_model()
 
 			if len(self.memory) > mini_batch_size:
-				self.step_count = self.m.turn - self.step_count
+				
 
 				# sample from memory
 				mini_batch = self.memory.sample(self.mini_batch_size)
 
-				self.optimize(mini_batch, self.model, self.target)
+				self.optimize(mini_batch, self.model, self.target, discount_factor_g)
 
-				#TODO: Implement exploration policy decay
+				self.model.decrease_exploration_rate()
+
 				# synching the networks
 				if self.step_count > network_sync_rate:
 					self.target.load_state_dict(self.model.state_dict())
@@ -91,7 +91,7 @@ class Trainer:
 		return self.total_reward
 
 	#TODO: implement
-	def optimize(self, mini_batch, policy_dqn, target_dqn):
+	def optimize(self, mini_batch, policy_dqn, target_dqn, discount_factor):
 		pass
 
 	def turn_callback(self, team: int, ID: int, previous_pos: tuple, action: int, list_agents: list[Agent]):
@@ -101,6 +101,9 @@ class Trainer:
 		It gets the state saved in the model, which is a previous state, and saves the previous and new total reward, they are used to calculate the episode reward
 		"""
 		if team == 0:
+			
+			self.step_count += 1
+
 			view = None
 			map = self.m.map
 			for agent in list_agents:
@@ -111,7 +114,9 @@ class Trainer:
 			new_state = [item for data in view.values() for item in data]
 			reward = self.model.get_reward(agents=list_agents)
 
-			self.memory.append(state, action, new_state, reward)
+			transition = (state, action, new_state, reward)
+
+			self.memory.append(transition)
 
 			self.previous_total_reward = self.total_reward
 			self.total_reward += reward
