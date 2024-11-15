@@ -54,6 +54,9 @@ if __name__ == "__main__":
     if args.train: 
         #TODO: Implement Baisian optimization
         t = Trainer(model0, model1)
+
+        t.episodes_trained(100)
+        
         final_reward = t.train(
                 epsilon_min= 0.05,
                 epsilon_init= 1,

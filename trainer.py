@@ -1,9 +1,14 @@
+import os
+
 import torch
 from torch import nn
 from ai.ddqn import Ddqn
 from entities import Match, Map, Agent
 from ai.experience_replay import ReplayMemory
-import os
+from torch.utils.tensorboard import SummaryWriter
+
+from datetime import datetime, timedelta
+
 
 class Trainer:
 	
@@ -20,18 +25,22 @@ class Trainer:
 		self.target = Ddqn(0, STATE_SIZE, 10)
 		self.loss_fn = nn.MSELoss()
 		self.optimizer = None
+		self.episodes_quantity = 100_000
 
 		self.target.load_state_dict(self.model.state_dict())
 
-		dir = "model"
-		os.makedirs(dir, exist_ok=True)
 		self.rewards_per_episode = []
 		self.total_reward = 0
 		self.best_reward = -999999
 		self.step_count = 0
 		self.previous_total_reward = 0
 
-		self.MODEL_FILE = os.path.join(dir, "best.pt")
+		self.MODEL_FILE = os.path.join("model", "best.pt")
+
+		self.writer = SummaryWriter()
+
+		self.loss_path = "loss"
+		self.rewards_path = "reward"
 	
 	def train(
 			self, 
@@ -46,9 +55,8 @@ class Trainer:
 		"""
 			Receives the training parameters used and train the model
 			Return:
-				the total reward value, which should be maximized 
+				the mean reward value, which should be maximized 
 		"""
-		#TODO: Add LOGS
 		
 		# a episode is one match
 		num_actions = 10
@@ -62,13 +70,15 @@ class Trainer:
 
 		self.model.exploration_policy(True, epsilon, epsilon_decay, epsilon_min)
 
-		for episode in range(0, 100):
-
+		for episode in range(0, self.episodes_quantity):
+			self.current_episode = episode
 			self.m = Match(3, self.model, self.enemy, presentation=False, sleep_time=0.01, print_log=False)
 
 			self.m.play(self.turn_callback)
 
 			episode_reward = float(self.total_reward.item()) - self.previous_total_reward
+
+			self.writer.add_scalar(self.rewards_path, episode_reward, episode+1)
 
 			self.previous_total_reward = float(self.total_reward.item())
 
@@ -93,8 +103,12 @@ class Trainer:
 					self.target.load_state_dict(self.model.state_dict())
 
 		print(self.model.get_extreme_rewards())
+		
+		self.writer.flush()
 
-		return self.total_reward
+		self.writer.close()
+
+		return self.total_reward / self.episodes_quantity
 
 	def optimize(self, mini_batch, policy_dqn:Ddqn, target_dqn:Ddqn, discount_factor):
 		# transpose the list of experience and separate each element
@@ -125,6 +139,8 @@ class Trainer:
 
 		# compute loss for the whole minibatch
 		loss = self.loss_fn(current_q, target_q)
+		self.writer.add_scalar(self.loss_path, loss, self.current_episode+1)
+
 
 		# optimize the model
 		self.optimizer.zero_grad()  # clear gradients
@@ -164,9 +180,11 @@ class Trainer:
 			self.total_reward += reward
 
 
-	#TODO: IMPLEMENT
 	def save_model(self):
 		"""
 		Save the current model in a file
 		"""
 		torch.save(self.model.state_dict(), self.MODEL_FILE)
+
+	def episodes_trained(self, quantity):
+		self.episodes_quantity = quantity

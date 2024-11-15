@@ -110,7 +110,6 @@ class Ddqn(AI):
 
     previous_epsilon = self.epsilon
 
-    #TODO: Should implement an epsilon log?
     self.epsilon = max(previous_epsilon * self.epsilon_decay, self.epsilon_min)
 
     self.epsilon_history.append(self.epsilon)
