@@ -1,5 +1,6 @@
 from ai import *
-from entities import Match, Map, Agent, Trainer
+from entities import Match, Map, Agent
+from trainer import Trainer
 
 import pygad.torchga, torch
 
@@ -36,10 +37,10 @@ if __name__ == "__main__":
     # the state is composed of a view range with 121 cells
 		# each cell has 8 information
 		# thus our state tensor has 121*8 items
-    STATE_SIZE = 121*8
+    STATE_SIZE = 1089
     num_actions = 10
     class0 = getattr(importlib.import_module(f"ai.{args.team_0_module}", "ai"), args.team_0_class)
-    model0: torch.nn.Module = class0(STATE_SIZE, num_actions)
+    model0: torch.nn.Module = class0(0, STATE_SIZE, num_actions)
     if not args.load_0 is None and os.path.isfile(args.load_0):
         state_dict = torch.load(args.load_0)
         model0.load_state_dict(state_dict)
@@ -53,7 +54,26 @@ if __name__ == "__main__":
     if args.train: 
         #TODO: Implement Baisian optimization
         t = Trainer(model0, model1)
-        t.train(args.generations, args.parents)
+        final_reward = t.train(
+                epsilon_min= 0.05,
+                epsilon_init= 1,
+                epsilon_decay= 0.9995,
+                learning_rate= 0.0001,
+                discount_factor_g= 0.99,
+                network_sync_rate= 10,
+                mini_batch_size= 40
+                )
+        print("----------------------reward per episode---------------")
+        print(t.rewards_per_episode)
+        print("-------------------------------------------------------")
+
+        print("----------------------maximum reward per episode---------------")
+        print(max(t.rewards_per_episode))        
+        print("-------------------------------------------------------")
+
+
+
+        print("final training reward" + str(final_reward.item()))
     else:
         m = Match(3, model0, model1, presentation=args.presentation, sleep_time=args.sleep) 
         m.play()

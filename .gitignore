@@ -1,3 +1,5 @@
 *.pt
 ai/simple_ga_ann.py
 *.pyc
+.vscode
+__pycache__
