@@ -3,7 +3,7 @@ from torch import nn
 from ai.ddqn import Ddqn
 from entities import Match, Map, Agent
 from ai.experience_replay import ReplayMemory
-
+import os
 
 class Trainer:
 	
@@ -23,12 +23,15 @@ class Trainer:
 
 		self.target.load_state_dict(self.model.state_dict())
 
-				
+		dir = "model"
+		os.makedirs(dir, exist_ok=True)
 		self.rewards_per_episode = []
 		self.total_reward = 0
 		self.best_reward = -999999
 		self.step_count = 0
 		self.previous_total_reward = 0
+
+		self.MODEL_FILE = os.path.join(dir, "best.pt")
 	
 	def train(
 			self, 
@@ -59,7 +62,7 @@ class Trainer:
 
 		self.model.exploration_policy(True, epsilon, epsilon_decay, epsilon_min)
 
-		for episode in range(0, 10000):
+		for episode in range(0, 100):
 
 			self.m = Match(3, self.model, self.enemy, presentation=False, sleep_time=0.01, print_log=False)
 
@@ -166,4 +169,4 @@ class Trainer:
 		"""
 		Save the current model in a file
 		"""
-		pass
+		torch.save(self.model.state_dict(), self.MODEL_FILE)
