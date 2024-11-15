@@ -16,11 +16,17 @@ class Ddqn(AI):
     self.num_action = num_actions
     self.epsilon_history = []
 
+    # a previous trained maximum reward {'max_health_reward': 14, 'min_health_reward': -34, 'max_experience_reward': 21, 'min_experience_reward': -31}
+
     #TODO: retirar final
     self.max_health_reward = None
     self.min_health_reward = None
-    self.max_experience_reward = None
-    self.min_experience_reward = None
+
+    # initial values based in previous experiences
+    self.max_experience_reward = 21
+    self.min_experience_reward = -31
+    
+    
     self.max_total_reward = None
     self.min_total_reward = None
 
@@ -83,19 +89,29 @@ class Ddqn(AI):
     reward_by_experience = my_total_experience - enemy_total_experience
 
     total_reward = reward_by_health+reward_by_experience
-    
+    # these values are used to normalize the rewards
     self.update_rewards(reward_by_experience=reward_by_experience, reward_by_health=reward_by_health, total_reward=total_reward)
+    
+    normalized_health_reward, normalized_experience_reward = self.normalize_rewards(reward_by_health, reward_by_experience)
 
-    #TODO: normalize?
+    healt_reward_weight = 0.7
+    experience_reward_weight = 0.3
+
+    normalized_reward = healt_reward_weight*normalized_health_reward+experience_reward_weight*normalized_experience_reward
+    
+
     print("")
 
     print(f"reward by health: {reward_by_health}")
     print(f"reward by experience: {reward_by_experience}")
+    print(f"normalized health reward: {normalized_health_reward}")
+    print(f"normalized experience reward: {normalized_experience_reward}")
+    print(f"total normalized reward: {normalized_reward}")
     print(f"total turn reward: {total_reward}")
 
     print("")
 
-    return total_reward
+    return normalized_reward
   
   def exploration_policy(self, active, epsilon, epsilon_decay, epsilon_min):
     
@@ -132,12 +148,8 @@ class Ddqn(AI):
         self.min_health_reward = min(self.min_health_reward, reward_by_health)
 
     # Atualiza os valores máximos e mínimos para experience reward
-    if self.max_total_reward is None or self.min_total_reward is None:
-        self.max_experience_reward = reward_by_experience
-        self.min_experience_reward = reward_by_experience
-    else:
-        self.max_experience_reward = max(self.max_experience_reward, reward_by_experience)
-        self.min_experience_reward = min(self.min_experience_reward, reward_by_experience)
+    self.max_experience_reward = max(self.max_experience_reward, reward_by_experience)
+    self.min_experience_reward = min(self.min_experience_reward, reward_by_experience)
 
     # Atualiza os valores máximos e mínimos para total reward
     if self.max_total_reward is None or self.min_total_reward is None:
@@ -159,3 +171,21 @@ class Ddqn(AI):
         "max_total_reward": self.max_total_reward,
         "min_total_reward": self.min_total_reward
     }
+  
+  def normalize_rewards(self, reward_by_health, reward_by_experience):
+      
+    # a team has 3 players, a player has maximum health of 10, thus
+    # a team maximum health is 30
+    max_health = 30
+    normalized_health_reward = reward_by_health / max_health
+
+    # Normalização de experiência baseada em valores dinâmicos
+    max_observed_experience_reward = self.max_experience_reward
+    min_observed_experience_reward = self.min_experience_reward
+
+    normalized_experience_reward = reward_by_experience / max_observed_experience_reward
+
+
+    normalized_experience_reward = 2 * (reward_by_experience - min_observed_experience_reward) / (max_observed_experience_reward - min_observed_experience_reward) - 1
+
+    return (normalized_health_reward, normalized_experience_reward)
