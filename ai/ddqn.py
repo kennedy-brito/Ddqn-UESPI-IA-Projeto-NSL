@@ -100,16 +100,6 @@ class Ddqn(AI):
     normalized_reward = healt_reward_weight*normalized_health_reward+experience_reward_weight*normalized_experience_reward
     
 
-    print("")
-
-    print(f"reward by health: {reward_by_health}")
-    print(f"reward by experience: {reward_by_experience}")
-    print(f"normalized health reward: {normalized_health_reward}")
-    print(f"normalized experience reward: {normalized_experience_reward}")
-    print(f"total normalized reward: {normalized_reward}")
-    print(f"total turn reward: {total_reward}")
-
-    print("")
 
     return normalized_reward
   
@@ -126,7 +116,6 @@ class Ddqn(AI):
 
     previous_epsilon = self.epsilon
 
-    #TODO: Should implement an epsilon log?
     self.epsilon = max(previous_epsilon * self.epsilon_decay, self.epsilon_min)
 
     self.epsilon_history.append(self.epsilon)

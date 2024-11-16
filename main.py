@@ -1,6 +1,7 @@
 from ai import *
 from entities import Match, Map, Agent
 from trainer import Trainer
+from constants import *
 
 import pygad.torchga, torch
 
@@ -37,10 +38,10 @@ if __name__ == "__main__":
     # the state is composed of a view range with 121 cells
 		# each cell has 8 information
 		# thus our state tensor has 121*8 items
-    STATE_SIZE = 1089
-    num_actions = 10
+    
+    
     class0 = getattr(importlib.import_module(f"ai.{args.team_0_module}", "ai"), args.team_0_class)
-    model0: torch.nn.Module = class0(0, STATE_SIZE, num_actions)
+    model0: torch.nn.Module = class0(0, STATE_SIZE, NUM_ACTIONS)
     if not args.load_0 is None and os.path.isfile(args.load_0):
         state_dict = torch.load(args.load_0)
         model0.load_state_dict(state_dict)
@@ -54,14 +55,17 @@ if __name__ == "__main__":
     if args.train: 
         #TODO: Implement Baisian optimization
         t = Trainer(model0, model1)
+
+        t.episodes_trained(FINAL_TRAINING_QUANTITY)
+
         final_reward = t.train(
-                epsilon_min= 0.05,
                 epsilon_init= 1,
+                epsilon_min= 0.05,
+                mini_batch_size= 40,
                 epsilon_decay= 0.9995,
                 learning_rate= 0.0001,
-                discount_factor_g= 0.99,
                 network_sync_rate= 10,
-                mini_batch_size= 40
+                discount_factor_g= 0.99
                 )
         print("----------------------reward per episode---------------")
         print(t.rewards_per_episode)

@@ -1,1 +1,12 @@
-{"0": {"0": 
+{
+    "target": 44.917,
+    "params": {
+        "discount_factor_g": 0.9311004654338743,
+        "epsilon_decay": 0.9939279979948836,
+        "epsilon_init": 0.9077633468006714,
+        "epsilon_min": 0.04772750629629654,
+        "learning_rate": 0.00688367305392792,
+        "mini_batch_size": 40.0,
+        "network_sync_rate": 1817.176154586418
+    }
+}
