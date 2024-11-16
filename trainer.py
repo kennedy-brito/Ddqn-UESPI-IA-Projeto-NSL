@@ -1,5 +1,7 @@
 import os
 
+from constants import *
+
 import torch
 from torch import nn
 from ai.ddqn import Ddqn
@@ -17,12 +19,13 @@ class Trainer:
 		model0: Ddqn,
 		model1
 		) -> None:
-		STATE_SIZE = 1089
 
 		self.model = model0
 		self.enemy = model1
 		self.memory = ReplayMemory(1000)
-		self.target = Ddqn(0, STATE_SIZE, 10)
+
+		self.target = Ddqn(MY_TEAM, STATE_SIZE, NUM_ACTIONS)
+		
 		self.loss_fn = nn.MSELoss()
 		self.optimizer = None
 		self.episodes_quantity = 100_000
@@ -37,6 +40,9 @@ class Trainer:
 
 		self.MODEL_FILE = os.path.join("model", "best.pt")
 
+		self.should_log = True
+
+		
 		self.writer = SummaryWriter()
 
 		self.loss_path = "loss"
@@ -50,7 +56,7 @@ class Trainer:
 			learning_rate, # the model learning rate
 			discount_factor_g, # the discount factor of the rewards
 			network_sync_rate, # the rate that we sync the target network with the model
-			mini_batch_size = 32, # the size of the memory sample used to train the model
+			mini_batch_size = 40, # the size of the memory sample used to train the model
 			continue_last_model = False):
 		"""
 			Receives the training parameters used and train the model
@@ -71,6 +77,10 @@ class Trainer:
 		self.model.exploration_policy(True, epsilon, epsilon_decay, epsilon_min)
 
 		for episode in range(0, self.episodes_quantity):
+	
+			if episode+1 % 500 == 0:
+				print("Current episode: " + str(episode+1))
+	
 			self.current_episode = episode
 			self.m = Match(3, self.model, self.enemy, presentation=False, sleep_time=0.01, print_log=False)
 
@@ -78,7 +88,8 @@ class Trainer:
 
 			episode_reward = float(self.total_reward.item()) - self.previous_total_reward
 
-			self.writer.add_scalar(self.rewards_path, episode_reward, episode+1)
+			if self.should_log:
+				self.writer.add_scalar(self.rewards_path, episode_reward, episode+1)
 
 			self.previous_total_reward = float(self.total_reward.item())
 
@@ -104,11 +115,11 @@ class Trainer:
 
 		print(self.model.get_extreme_rewards())
 		
-		self.writer.flush()
+		if self.should_log:
+			self.writer.flush()
+			self.writer.close()
 
-		self.writer.close()
-
-		return self.total_reward / self.episodes_quantity
+		return float(self.total_reward.item()) / self.episodes_quantity
 
 	def optimize(self, mini_batch, policy_dqn:Ddqn, target_dqn:Ddqn, discount_factor):
 		# transpose the list of experience and separate each element
@@ -139,7 +150,9 @@ class Trainer:
 
 		# compute loss for the whole minibatch
 		loss = self.loss_fn(current_q, target_q)
-		self.writer.add_scalar(self.loss_path, loss, self.current_episode+1)
+	
+		if self.should_log:
+			self.writer.add_scalar(self.loss_path, loss, self.current_episode+1)
 
 
 		# optimize the model
@@ -188,3 +201,10 @@ class Trainer:
 
 	def episodes_trained(self, quantity):
 		self.episodes_quantity = quantity
+	
+	def activate_log(self, should_log):
+
+		self.should_log = should_log
+		
+		if not self.should_log:
+			self.writer.close()

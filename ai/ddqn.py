@@ -87,13 +87,6 @@ class Ddqn(AI):
     self.update_rewards(reward_by_experience=reward_by_experience, reward_by_health=reward_by_health, total_reward=total_reward)
 
     #TODO: normalize?
-    print("")
-
-    print(f"reward by health: {reward_by_health}")
-    print(f"reward by experience: {reward_by_experience}")
-    print(f"total turn reward: {total_reward}")
-
-    print("")
 
     return total_reward
   
