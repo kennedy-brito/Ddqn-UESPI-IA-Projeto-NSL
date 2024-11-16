@@ -80,7 +80,7 @@ for i, res in enumerate(optimizer.res):
 
 
 # Salvando no arquivo de log
-with open("log.json", "w") as log_file:
+with open("log_normalized.json", "w") as log_file:
     json.dump(optimizer.max, log_file, indent=4)  # `indent=4` para deixar legível
 
 print("Hyperparâmetros otimizados salvos no arquivo log.json!")
