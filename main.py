@@ -67,7 +67,8 @@ if __name__ == "__main__":
                 epsilon_decay= params['epsilon_decay'],
                 learning_rate= params['learning_rate'],
                 network_sync_rate= params['network_sync_rate'],
-                discount_factor_g= params['discount_factor_g']
+                discount_factor_g= params['discount_factor_g'],
+                continue_last_model=True
                 )
 
         with open("log.txt", "w") as log:

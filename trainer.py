@@ -73,8 +73,18 @@ class Trainer:
 		epsilon = epsilon_init
 
 		self.model.exploration_policy(True, epsilon, epsilon_decay, epsilon_min)
+		self.episode = 0
 
-		for episode in range(0, self.episodes_quantity):
+		if continue_last_model:
+			checkpoint = torch.load(self.CHECKPOINT_PATH, weights_only=True)
+
+			self.best_reward = checkpoint['best_reward'] if 'best_reward' in checkpoint else self.best_reward
+			self.model.load_state_dict(checkpoint['model_state_dict'])
+			self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+			self.episode = checkpoint['episode']
+			self.episodes_quantity = self.episodes_quantity + self.episode
+
+		for episode in range(self.episode, self.episodes_quantity):
 	
 			if episode+1 % 500 == 0:
 				print("Current episode: " + str(episode+1))
@@ -105,11 +115,11 @@ class Trainer:
 
 				self.optimize(mini_batch, self.model, self.target, discount_factor_g)
 
-				self.model.decrease_exploration_rate()
-
 				# synching the networks
 				if self.step_count > network_sync_rate:
 					self.target.load_state_dict(self.model.state_dict())
+
+				self.model.decrease_exploration_rate()
 
 		print(self.model.get_extreme_rewards())
 		
@@ -159,6 +169,7 @@ class Trainer:
 		self.optimizer.step()       # update network parameters i.e. weight and bias
 
 		torch.save({
+						'best_reward': self.best_reward,
 						'episode': self.current_episode,
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
