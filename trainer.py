@@ -213,8 +213,11 @@ class Trainer:
 		"""
 		Save the current model in a file
 		"""
-		torch.save(self.model.state_dict(), self.MODEL_FILE)
-
+		torch.save({
+					'best_reward': self.best_reward,
+					'episode': self.current_episode,
+					'model_state_dict': self.model.state_dict()
+					}, self.MODEL_FILE)
 
 	def episodes_trained(self, quantity):
 		self.episodes_quantity = quantity
