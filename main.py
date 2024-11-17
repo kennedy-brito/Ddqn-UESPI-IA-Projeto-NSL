@@ -2,6 +2,7 @@ from ai import *
 from entities import Match, Map, Agent
 from trainer import Trainer
 from constants import *
+import json
 
 import pygad.torchga, torch
 
@@ -35,10 +36,6 @@ if __name__ == "__main__":
     Map.MAX_WIDTH = args.max_width
     Map.MAX_HEIGHT = args.max_height
 
-    # the state is composed of a view range with 121 cells
-		# each cell has 8 information
-		# thus our state tensor has 121*8 items
-    
     
     class0 = getattr(importlib.import_module(f"ai.{args.team_0_module}", "ai"), args.team_0_class)
     model0: torch.nn.Module = class0(0, STATE_SIZE, NUM_ACTIONS)
@@ -53,31 +50,36 @@ if __name__ == "__main__":
         model1.load_state_dict(state_dict)
     
     if args.train: 
-        #TODO: Implement Baisian optimization
+        params = {}
+        with open("log_normalized.json", "r") as log_file:
+            log_data = json.load(log_file)
+
+            params = log_data['params']
+        
         t = Trainer(model0, model1)
 
         t.episodes_trained(FINAL_TRAINING_QUANTITY)
 
-        final_reward = t.train(
-                epsilon_init= 1,
-                epsilon_min= 0.05,
+        mean_reward = t.train(
+                epsilon_init= params['epsilon_init'],
+                epsilon_min= params['epsilon_min'],
                 mini_batch_size= 40,
-                epsilon_decay= 0.9995,
-                learning_rate= 0.0001,
-                network_sync_rate= 10,
-                discount_factor_g= 0.99
+                epsilon_decay= params['epsilon_decay'],
+                learning_rate= params['learning_rate'],
+                network_sync_rate= params['network_sync_rate'],
+                discount_factor_g= params['discount_factor_g']
                 )
-        print("----------------------reward per episode---------------")
-        print(t.rewards_per_episode)
-        print("-------------------------------------------------------")
 
-        print("----------------------maximum reward per episode---------------")
-        print(max(t.rewards_per_episode))        
-        print("-------------------------------------------------------")
+        with open("log.txt", "w") as log:
+            logging = "----------------------maximum reward per episode---------------\n"
+            logging = logging + str(float(max(t.rewards_per_episode)))        
+            logging = logging + "-------------------------------------------------------\n"
+            
+            logging = logging + "mean training reward" + str(mean_reward)
 
-
-
-        print("final training reward" + str(final_reward.item()))
+            log.write(f"{logging}\n")
+    
     else:
+        model0.eval()
         m = Match(3, model0, model1, presentation=args.presentation, sleep_time=args.sleep) 
         m.play()

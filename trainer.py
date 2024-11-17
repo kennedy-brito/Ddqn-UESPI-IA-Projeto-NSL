@@ -39,7 +39,8 @@ class Trainer:
 		self.previous_total_reward = 0
 
 		self.MODEL_FILE = os.path.join("model", "best.pt")
-
+		self.CHECKPOINT_PATH = os.path.join("model", "checkpoint.pt")
+		
 		self.should_log = True
 
 		
@@ -63,9 +64,6 @@ class Trainer:
 			Return:
 				the mean reward value, which should be maximized 
 		"""
-		
-		# a episode is one match
-		num_actions = 10
 
 		self.optimizer = torch.optim.Adam(
 			self.model.parameters(),
@@ -160,6 +158,13 @@ class Trainer:
 		loss.backward()            # compute gradients (backpropagation)
 		self.optimizer.step()       # update network parameters i.e. weight and bias
 
+		torch.save({
+						'episode': self.current_episode,
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'loss': loss
+            }, self.CHECKPOINT_PATH)
+
 	def turn_callback(self, team: int, ID: int, previous_pos: tuple, action, list_agents: list[Agent]):
 
 		"""
@@ -198,6 +203,7 @@ class Trainer:
 		Save the current model in a file
 		"""
 		torch.save(self.model.state_dict(), self.MODEL_FILE)
+
 
 	def episodes_trained(self, quantity):
 		self.episodes_quantity = quantity
