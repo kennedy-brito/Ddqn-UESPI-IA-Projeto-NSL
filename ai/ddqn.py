@@ -98,8 +98,8 @@ class Ddqn(AI):
     
     normalized_health_reward, normalized_experience_reward = self.normalize_rewards(reward_by_health, reward_by_experience)
 
-    healt_reward_weight = 0.7
-    experience_reward_weight = 0.3
+    healt_reward_weight = 0.6
+    experience_reward_weight = 0.4
 
     normalized_reward = healt_reward_weight*normalized_health_reward+experience_reward_weight*normalized_experience_reward
     
