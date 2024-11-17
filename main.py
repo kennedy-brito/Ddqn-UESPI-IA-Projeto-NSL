@@ -51,7 +51,7 @@ if __name__ == "__main__":
     
     if args.train: 
         params = {}
-        with open("log_normalized.json", "r") as log_file:
+        with open("hyperparams_normalized.json", "r") as log_file:
             log_data = json.load(log_file)
 
             params = log_data['params']
@@ -70,13 +70,12 @@ if __name__ == "__main__":
                 discount_factor_g= params['discount_factor_g'],
                 continue_last_model=True
                 )
+        logging = t.model.get_extreme_rewards()
+        with open("log.json", "w") as log:
+            logging['max_normalized_reward'] = float(max(t.rewards_per_episode))        
+            logging['mean_normalized_reward'] = mean_reward
 
-        with open("log.txt", "w") as log:
-            logging = "----------------------maximum reward per episode---------------\n"
-            logging = logging + str(float(max(t.rewards_per_episode)))        
-            logging = logging + "-------------------------------------------------------\n"
-            
-            logging = logging + "mean training reward" + str(mean_reward)
+
 
             log.write(f"{logging}\n")
     
