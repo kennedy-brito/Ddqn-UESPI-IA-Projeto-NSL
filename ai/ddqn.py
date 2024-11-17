@@ -51,7 +51,7 @@ class Ddqn(AI):
     state = torch.tensor(self.state, dtype=torch.float32).squeeze()
 
     self.state = state
-
+    
     if(self.explore_policy):
       if rd.random() < self.epsilon:
         action = rd.randint(0, self.num_action - 1)
@@ -60,7 +60,11 @@ class Ddqn(AI):
         with torch.no_grad():
           q_values = self.linear(state)
         action = q_values.squeeze().argmax()
+    else:
+      with torch.no_grad():
+          q_values = self.linear(state)
 
+      action = q_values.squeeze().argmax()
     return action
   
   def turn_reward(self, team: int, action: int, list_agents: list) -> None:
