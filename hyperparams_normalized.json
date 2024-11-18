@@ -1,12 +1,12 @@
 {
-    "target": 10.7047333984375,
+    "target": 15.12821875,
     "params": {
-        "discount_factor_g": 0.9408543821984187,
-        "epsilon_decay": 0.9986238557009316,
-        "epsilon_init": 0.8894248269472916,
-        "epsilon_min": 0.017664884360815907,
-        "learning_rate": 0.0007782806081390358,
+        "discount_factor_g": 0.9137667385553311,
+        "epsilon_decay": 0.9988632482706751,
+        "epsilon_init": 0.9984426241068756,
+        "epsilon_min": 0.09636710931159273,
+        "learning_rate": 0.008153008239302269,
         "mini_batch_size": 40.0,
-        "network_sync_rate": 1563.2077650242875
+        "network_sync_rate": 591.8515504363395
     }
 }
