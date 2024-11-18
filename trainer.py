@@ -86,7 +86,7 @@ class Trainer:
 
 		for episode in range(self.episode, self.episodes_quantity):
 	
-			if episode+1 % 500 == 0:
+			if (episode+1) % 500 == 0:
 				print("Current episode: " + str(episode+1))
 	
 			self.current_episode = episode

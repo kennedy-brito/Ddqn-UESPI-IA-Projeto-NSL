@@ -14,6 +14,7 @@ if __name__ == "__main__":
                     description='A project of unsupervised learning, for the AI class of UESPI-Floriano'
                     )
     parser.add_argument('-t', '--train', action='store_true')
+    parser.add_argument('-c', '--continue_model', action='store_true')
     parser.add_argument('-gens', '--generations', type=int, default=1000)
     parser.add_argument('-pars', '--parents', type=int, default=5)
 
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     model0: torch.nn.Module = class0(0, STATE_SIZE, NUM_ACTIONS)
     if not args.load_0 is None and os.path.isfile(args.load_0):
         state_dict = torch.load(args.load_0)
-        model0.load_state_dict(state_dict)
+        model0.load_state_dict(state_dict['model_state_dict'])
     
     class1 = getattr(importlib.import_module(f"ai.{args.team_1_module}", "ai"), args.team_1_class)
     model1: torch.nn.Module = class1(1)
@@ -51,6 +52,7 @@ if __name__ == "__main__":
     
     if args.train: 
         params = {}
+        continue_model = args.continue_model
         with open("hyperparams_normalized.json", "r") as log_file:
             log_data = json.load(log_file)
 
@@ -68,7 +70,7 @@ if __name__ == "__main__":
                 learning_rate= params['learning_rate'],
                 network_sync_rate= params['network_sync_rate'],
                 discount_factor_g= params['discount_factor_g'],
-                continue_last_model=True
+                continue_last_model=continue_model
                 )
         logging = t.model.get_extreme_rewards()
         with open("log.json", "w") as log:
