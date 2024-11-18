@@ -78,7 +78,9 @@ class Trainer:
 		if continue_last_model:
 			checkpoint = torch.load(self.CHECKPOINT_PATH, weights_only=True)
 
-			self.best_reward = checkpoint['best_reward'] if 'best_reward' in checkpoint else self.best_reward
+			best_model = torch.load(self.MODEL_FILE, weights_only=True)
+
+			self.best_reward = best_model['best_reward'] if 'best_reward' in best_model else self.best_reward
 			self.model.load_state_dict(checkpoint['model_state_dict'])
 			self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 			self.episode = checkpoint['episode']
