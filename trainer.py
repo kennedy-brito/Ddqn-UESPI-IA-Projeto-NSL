@@ -22,7 +22,7 @@ class Trainer:
 
 		self.model = model0
 		self.enemy = model1
-		self.memory = ReplayMemory(1000)
+		self.memory = ReplayMemory(4000)
 
 		self.target = Ddqn(MY_TEAM, STATE_SIZE, NUM_ACTIONS)
 		

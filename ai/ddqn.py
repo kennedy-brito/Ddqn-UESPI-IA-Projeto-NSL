@@ -23,7 +23,7 @@ class Ddqn(AI):
     self.min_health_reward = None
 
     # initial values based in previous experiences
-    self.max_experience_reward = 21
+    self.max_experience_reward = 31
     self.min_experience_reward = -31
     
     
