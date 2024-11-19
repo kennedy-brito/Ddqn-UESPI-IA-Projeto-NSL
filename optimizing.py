@@ -24,7 +24,7 @@ pbounds = {
   'learning_rate' : [0.0001, 0.01],
   'discount_factor_g' : [0.9,0.99],
   'network_sync_rate' : [500, 2000],
-  "mini_batch_size" : [30, 600]
+  "mini_batch_size" : [30, 128]
 
 }
 base_model: Ddqn = Ddqn(MY_TEAM, STATE_SIZE, NUM_ACTIONS)
@@ -40,7 +40,7 @@ def train(
       ):
   global base_model
 
-  model = Ddqn(MY_TEAM, STATE_SIZE, NUM_ACTIONS)
+  model = Ddqn(MY_TEAM, STATE_SIZE, NUM_ACTIONS) 
 
   model.load_state_dict(base_model.state_dict())
 
@@ -57,7 +57,7 @@ def train(
     learning_rate= learning_rate, 
     discount_factor_g= discount_factor_g, 
     network_sync_rate= network_sync_rate,
-    mini_batch_size=mini_batch_size
+    mini_batch_size=int(mini_batch_size)
   )
 
   return mean_reward
@@ -69,7 +69,7 @@ optimizer = BayesianOptimization(
 )
 
 optimizer.maximize(
-  n_iter=50,
+  n_iter=25,
   init_points=10
 )
 
