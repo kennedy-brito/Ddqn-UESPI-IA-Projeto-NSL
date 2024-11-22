@@ -65,7 +65,7 @@ if __name__ == "__main__":
         mean_reward = t.train(
                 epsilon_init= params['epsilon_init'],
                 epsilon_min= params['epsilon_min'],
-                mini_batch_size= 40,
+                mini_batch_size= int(params['mini_batch_size']),
                 epsilon_decay= params['epsilon_decay'],
                 learning_rate= params['learning_rate'],
                 network_sync_rate= params['network_sync_rate'],
