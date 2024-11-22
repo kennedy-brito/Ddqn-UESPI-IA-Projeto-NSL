@@ -1,10 +1,1 @@
-{
-  "max_health_reward": 31,
-  "min_health_reward": -32,
-  "max_experience_reward": 23,
-  "min_experience_reward": -54,
-  "max_total_reward": 32,
-  "min_total_reward": -79,
-  "max_normalized_reward": 96.5,
-  "mean_normalized_reward": 16.45442625
-}
+{'max_health_reward': 32, 'min_health_reward': -30, 'max_experience_reward': 32, 'min_experience_reward': -47, 'max_total_reward': 37, 'min_total_reward': -65, 'max_normalized_reward': 86.78125, 'mean_normalized_reward': 7.202775}
