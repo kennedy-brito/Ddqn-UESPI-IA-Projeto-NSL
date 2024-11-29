@@ -18,7 +18,6 @@ class Ddqn(AI):
 
     # a previous trained maximum reward {'max_health_reward': 14, 'min_health_reward': -34, 'max_experience_reward': 21, 'min_experience_reward': -31}
 
-    #TODO: retirar final
     self.max_health_reward = None
     self.min_health_reward = None
 
@@ -177,7 +176,6 @@ class Ddqn(AI):
     min_observed_experience_reward = self.min_experience_reward
 
     normalized_experience_reward = reward_by_experience / max_observed_experience_reward
-
 
     normalized_experience_reward = 2 * (reward_by_experience - min_observed_experience_reward) / (max_observed_experience_reward - min_observed_experience_reward) - 1
 

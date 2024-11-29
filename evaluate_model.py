@@ -81,9 +81,9 @@ win_rate = wins/(wins+draws+losses) * 100
 draw_rate = draws/(wins+draws+losses) * 100
 loss_rate = losses/(wins+draws+losses) * 100
 
-print(f"Win rate: {win_rate:.2}%")
-print(f"Draw rate: {draw_rate:.2}%")
-print(f"Loss rate: {loss_rate:.2}%")
+print(f"Win rate: {win_rate:.2f}%")
+print(f"Draw rate: {draw_rate:.2f}%")
+print(f"Loss rate: {loss_rate:.2f}%")
 
 print("\n" * 2)
 
