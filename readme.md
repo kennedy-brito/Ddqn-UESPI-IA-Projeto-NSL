@@ -18,3 +18,5 @@ Modelos devem ser treinados para sair o índice de uma dessas ações (0-9).
 **Exemplo de chamada - (treinamento)**: `python main.py -t -t0m="meu_modulo" -t0c="minha_classe" -t1m="random_ai" -t1c="DumbAI" -mw=20 -mh=20`
 
 **Exemplo de chamada - (apresentação)**: `python main.py -p -t0m="meu_modulo" -t0c="minha_classe" -t1m="random_ai" -t1c="DumbAI" -mw=20 -mh=20`
+
+**Chamando o modelo treinado (Ddqn versus modelo aleatório):** `python main.py -p -t0m="ddqn" -t0c="Ddqn" -t1m="random_ai" -t1c="RandomAI" -mw=20 -mh=20 -l0='model/best.pt' `
